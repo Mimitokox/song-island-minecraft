@@ -1,0 +1,40 @@
+{
+	"schemaVersion": 1,
+	"id": "song-island",
+	"version": "${version}",
+	"name": "Song Island",
+	"description": "A mod that adds a music island for YOU! (text IRL IN MINECRAFT!)",
+	"authors": [
+		"mimitokox_"
+	],
+	"contact": {
+		"homepage": "",
+		"sources": "https://github.com/Mimitokox/song-island-minecraft"
+	},
+	"license": "CC0-1.0",
+	"icon": {
+		"32": "assets/song-island/icon32.png",
+		"64": "assets/song-island/icon64.png",
+		"128": "assets/song-island/icon128.png",
+		"256": "assets/song-island/icon256.png",
+		"512": "assets/song-island/icon512.png"
+	},
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.top1.client.SongIslandClient"
+		]
+	},
+	"mixins": [
+		{
+			"config": "song-island.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": "*",
+		"minecraft": "1.21.11",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
