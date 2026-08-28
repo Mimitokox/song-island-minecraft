@@ -214,6 +214,8 @@ public class MusicIsland {
 			target = wordStartX + wordWidth / 2.0F - window / 2.0F + TEXT_LEAD;
 			target = Math.max(0.0F, Math.min(lineWidth - window + TEXT_TAIL, target));
 		}
+		float entry = scales.entry();
+		if(entry < 1.0F) scrollAnim.snap(target);
 		scrollAnim.update(target);
 		float scroll = scrollAnim.get();
 		boolean scrolling = lineWidth > window - TEXT_TAIL;
@@ -224,9 +226,12 @@ public class MusicIsland {
 		float blur = Math.min(3.5F, Math.abs(scrollAnim.delta()) * 1.4F);
 		float drawX = x - scroll;
 
+		alpha *= entry;
+		y += (1.0F - entry) * 5.0F;
 		int litColor = color(WHITE, alpha);
 		int grayColor = color(WHITE, alpha * 0.32F);
 
+		float shift = 0.0F;
 		for(int i = 0; i < words.size(); i++){
 			Karaoke.Word word = words.get(i);
 			String text = line.substring(word.start(), word.end());
@@ -236,7 +241,8 @@ public class MusicIsland {
 			Font wordFont = Fonts.medium(size);
 			float baseWidth = font.width(text);
 			float bigWidth = wordFont.width(text);
-			float renderX = wordX - (bigWidth - baseWidth) / 2.0F;
+			float renderX = wordX + shift;
+			shift += bigWidth - baseWidth;
 			float renderY = y - scale * 0.5F;
 			int[] colors = Karaoke.colors(text, sung - word.start(), litColor, grayColor);
 

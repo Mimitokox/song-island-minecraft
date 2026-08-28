@@ -7,14 +7,25 @@ public final class WordScales {
 	private List<Karaoke.Word> words = List.of();
 	private float[] scales = new float[0];
 	private long lastFrame;
+	private long lineChanged = -10000L;
 
 	public List<Karaoke.Word> words(String text) {
 		if(!text.equals(line)){
+			boolean first = line.isEmpty();
 			line = text;
 			words = Karaoke.words(text);
 			scales = new float[words.size()];
+			if(!first) lineChanged = System.currentTimeMillis();
 		}
 		return words;
+	}
+
+	/** 0 tuz po zmianie linijki, 1 gdy wejscie sie skonczylo. */
+	public float entry() {
+		float t = (System.currentTimeMillis() - lineChanged) / 260.0F;
+		if(t >= 1.0F) return 1.0F;
+		if(t <= 0.0F) return 0.0F;
+		return 1.0F - (1.0F - t) * (1.0F - t) * (1.0F - t);
 	}
 
 	public void update(int active) {
