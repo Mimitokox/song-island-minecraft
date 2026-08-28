@@ -69,6 +69,7 @@ public class MusicIsland {
 		IslandRender.drawSquircle(x, y, size.width, size.height, 2.0F + 5.0F * ext,
 			radius, radius, radius, radius, 0xD9101010);
 
+
 		IMediaSession session = tracker.getSession();
 		MediaInfo media = session != null ? session.getMedia() : null;
 

@@ -70,7 +70,7 @@ public class LyricsFetcher {
 			HttpRequest req = HttpRequest.newBuilder()
 				.uri(URI.create("https://lrclib.net/api/get?" + q)) //ejpiaj te gorsze ale nie chinskie
 				.header("User-Agent", "SongIsland/1.0") //reklama XXDDDDDDDDDDDDDDDDDDDD
-				.header("Lrclib-Client", "SongIsland 1.0.0")
+				.header("Lrclib-Client", "SongIsland 1.0.1")
 				.GET()
 				.build();
 			HttpResponse<String> resp = HTTP.send(req, HttpResponse.BodyHandlers.ofString());
@@ -102,7 +102,7 @@ public class LyricsFetcher {
 			HttpRequest req = HttpRequest.newBuilder()
 				.uri(URI.create("https://lrclib.net/api/search?" + q))
 				.header("User-Agent", "SongIsland/1.0 (https://github.com/top1)")
-				.header("Lrclib-Client", "SongIsland 1.0.0 (top1)")
+				.header("Lrclib-Client", "SongIsland 1 (top1)")
 				.GET()
 				.build();
 			HttpResponse<String> resp = HTTP.send(req, HttpResponse.BodyHandlers.ofString());
