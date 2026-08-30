@@ -160,6 +160,10 @@ public final class WorldLyrics {
 			}
 		}
 
+		// mirror the billboard when seen from behind so the line still reads left-to-right
+		float flip = (placed.anchor.x - cameraPos.x) * placed.rightZ
+			- (placed.anchor.z - cameraPos.z) * placed.rightX < 0.0 ? -1.0F : 1.0F;
+
 		double originX = placed.anchor.x - cameraPos.x;
 		double originY = placed.anchor.y - cameraPos.y + lift;
 		double originZ = placed.anchor.z - cameraPos.z;
@@ -175,7 +179,7 @@ public final class WorldLyrics {
 				if(charIndex >= 0 && charIndex < cols.length) color = cols[charIndex];
 			}
 			for(int v = 0; v < 4; v++){
-				float offsetX = quad[v * 5] * SCALE;
+				float offsetX = quad[v * 5] * SCALE * flip;
 				float offsetY = -(quad[v * 5 + 1] * SCALE);
 				verts[o] = (float) (originX + placed.rightX * offsetX);
 				verts[o + 1] = (float) (originY + offsetY);
