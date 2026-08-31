@@ -44,6 +44,7 @@ public class MusicIsland {
 	private long manualScrollAt;
 	private String currentLine = "";
 	private String previousLine = "";
+	private boolean lyricLine;
 	private long lineChanged = -10000L;
 
 	public MusicIsland(MusicTracker tracker) {
@@ -68,6 +69,7 @@ public class MusicIsland {
 			radius, radius, radius, radius, WHITE);
 		IslandRender.drawSquircle(x, y, size.width, size.height, 2.0F + 5.0F * ext,
 			radius, radius, radius, radius, 0xD9101010);
+
 
 		IMediaSession session = tracker.getSession();
 		MediaInfo media = session != null ? session.getMedia() : null;
@@ -155,6 +157,7 @@ public class MusicIsland {
 		Font font = Fonts.medium(7.0F);
 		Font bigFont = Fonts.medium(7.8F);
 		String line = pillLine(media);
+		boolean lyric = lyricLine;
 		float x1 = x + 15.0F;
 		float x2 = x + size.width - 4.0F;
 		float textY = y + 5.0F;
@@ -167,25 +170,26 @@ public class MusicIsland {
 			drawGhostedLine(font, previousLine, x1, textY - slide * 10.0F,
 				x1, x2, alpha * (1.0F - slide), slide);
 			drawKaraokeLine(font, bigFont, line, x1, textY + (1.0F - slide) * 10.0F,
-				x1, x2, alpha * slide, media, pillScroll, pillScales);
+				x1, x2, alpha * slide, media, pillScroll, pillScales, lyric);
 		}else{
 			drawKaraokeLine(font, bigFont, line, x1, textY,
-				x1, x2, alpha, media, pillScroll, pillScales);
+				x1, x2, alpha, media, pillScroll, pillScales, lyric);
 		}
 	}
 
 	private void drawKaraokeLine(Font font, Font bigFont, String line, float x, float y,
-		float x1, float x2, float alpha, MediaInfo media, Anim scrollAnim, WordScales scales) {
+		float x1, float x2, float alpha, MediaInfo media, Anim scrollAnim, WordScales scales,
+		boolean lyric) {
 		if(line.isEmpty()) return;
 		List<LyricsFetcher.LyricLine> lines = tracker.getLyrics();
 		boolean synced = !lines.isEmpty() && lines.get(0).time() >= 0.0F;
 		float position = tracker.smoothPosition();
 		int index = synced ? LyricsFetcher.currentIndex(lines, position) : -1;
 
-		if(!synced || index < 0){
+		if(!synced || index < 0 || !lyric){
 			float window = x2 - x1;
 			float lineWidth = font.width(line);
-			float offset = marquee(lineWidth, window);
+			float offset = marquee(lineWidth, window, System.currentTimeMillis() - lineChanged);
 			boolean overflow = lineWidth > window;
 			float left = overflow ? Math.max(0.0F, Math.min(7.0F, offset * 1.6F)) : 0.0F;
 			float right = overflow
@@ -264,13 +268,13 @@ public class MusicIsland {
 		}
 	}
 
-	private static float marquee(float contentWidth, float window) {
+	private static float marquee(float contentWidth, float window, long elapsed) {
 		float overflow = contentWidth - window + 2.0F;
 		if(overflow <= 0.0F) return 0.0F;
 		float travel = 2400.0F + overflow * 90.0F;
 		float hold = 1600.0F;
 		float cycle = (travel + hold) * 2.0F;
-		float t = System.currentTimeMillis() % (long) cycle;
+		float t = Math.max(0L, elapsed) % (long) cycle;
 		float phase;
 		if(t < hold) phase = 0.0F;
 		else if(t < hold + travel) phase = (t - hold) / travel;
@@ -302,10 +306,10 @@ public class MusicIsland {
 		float height = targetHeight();
 
 		boolean titleOverflow = title.width(media.getTitle()) > textWidth;
-		boolean artistOverflow = regular.width(media.getArtist()) > textWidth;
+		boolean artistOverflow = regular.width(artistName(media)) > textWidth;
 		IslandRender.drawWindowedText(title, media.getTitle(), textX, y + 13.0F,
 			color(WHITE, alpha), textX - 1.0F, textX + textWidth, titleOverflow ? 8.0F : 0.0F, 0.0F);
-		IslandRender.drawWindowedText(regular, media.getArtist(), textX, y + 23.0F,
+		IslandRender.drawWindowedText(regular, artistName(media), textX, y + 23.0F,
 			color(WHITE, alpha * 0.65F), textX - 1.0F, textX + textWidth, artistOverflow ? 8.0F : 0.0F, 0.0F);
 
 		float barWidth = 116.0F;
@@ -464,7 +468,7 @@ public class MusicIsland {
 			float alpha = 255.0F * ext * edge;
 			if(i == index && synced){
 				drawKaraokeLine(active, activeBig, text, ax, lineY,
-					ax, ax + aw, alpha, media, expandedScroll, expandedScales);
+					ax, ax + aw, alpha, media, expandedScroll, expandedScales, true);
 			}else{
 				boolean overflow = idle.width(text) > aw;
 				IslandRender.drawWindowedText(idle, text, ax, lineY,
@@ -507,11 +511,15 @@ public class MusicIsland {
 
 	private String pillLine(MediaInfo media) {
 		List<LyricsFetcher.LyricLine> lines = tracker.getLyrics();
-		String line = media.getTitle() + "  |  " + media.getArtist();
+		String line = media.getTitle() + "  |  " + artistName(media);
+		lyricLine = false;
 		if(!lines.isEmpty() && lines.get(0).time() >= 0.0F){
 			float position = tracker.smoothPosition();
 			int index = LyricsFetcher.currentIndex(lines, position);
-			if(index >= 0 && !inGap(lines, index, position)) line = lines.get(index).text();
+			if(index >= 0 && !inGap(lines, index, position)){
+				line = lines.get(index).text();
+				lyricLine = true;
+			}
 		}
 		if(!line.equals(currentLine)){
 			previousLine = currentLine;
@@ -519,6 +527,11 @@ public class MusicIsland {
 			lineChanged = System.currentTimeMillis();
 		}
 		return line;
+	}
+
+	private static String artistName(MediaInfo media) {
+		String artist = media.getArtist();
+		return artist == null ? "" : artist.replace(" & ", " i ");
 	}
 
 	private static boolean inGap(List<LyricsFetcher.LyricLine> lines, int index, float position) {

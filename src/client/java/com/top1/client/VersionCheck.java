@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class VersionCheck {
-	public static final String VERSION = "1.0.0";
+	public static final String VERSION = "1.0.1";
 	private static final String VERSION_URL =
 		"https://raw.githubusercontent.com/Mimitokox/song-island-minecraft/refs/heads/main/version.txt";
 	private static final String DOWNOLAD_URELEL =
