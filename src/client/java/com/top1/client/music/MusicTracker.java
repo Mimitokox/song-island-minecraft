@@ -270,7 +270,7 @@ public class MusicTracker {
 				return textureCache.get(hash);
 			}
 			Identifier id = com.top1.client.island.render.IslandRender.id("temp/" + randomString());
-			DynamicTexture texture = new DynamicTexture(() -> "song island cover", NativeImage.read(data));
+			DynamicTexture texture = new DynamicTexture(() -> "song island cover", NativeImage.read(toPng(data)));
 			mediaColor = averageColor(texture.getPixels(), 2);
 			Minecraft.getInstance().getTextureManager().register(id, texture);
 			textureCache.put(hash, id);
@@ -279,6 +279,15 @@ public class MusicTracker {
 		}catch(Exception e){
 			return null;
 		}
+	}
+
+	// Apple Music wystawia JPEG, NativeImage czyta tylko PNG
+	private static byte[] toPng(byte[] data) throws Exception {
+		java.awt.image.BufferedImage image = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(data));
+		if(image == null) throw new java.io.IOException("unsupported artwork format");
+		java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+		javax.imageio.ImageIO.write(image, "png", out);
+		return out.toByteArray();
 	}
 
 	public static int averageColor(com.mojang.blaze3d.platform.NativeImage image, int step) {
